@@ -19,7 +19,7 @@ public class AccountService  {
 	@Autowired
 	private AccountRepo accountRepo;
 	
-	@Autowired
+//	@Autowired
 	PasswordEncoder passwordEncoder;
 	
 	@Autowired
