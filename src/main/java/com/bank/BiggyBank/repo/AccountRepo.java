@@ -10,6 +10,6 @@ import com.bank.BiggyBank.model.Account;
 @Repository
 public interface AccountRepo extends JpaRepository<Account, Integer> {
 	
-	Optional<Account> findByName(String name);
+	Optional<Account> findByUsername(String name);
 
 }

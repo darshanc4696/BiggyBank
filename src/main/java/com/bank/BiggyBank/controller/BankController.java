@@ -1,11 +1,16 @@
 package com.bank.BiggyBank.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import java.math.BigDecimal;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.bank.BiggyBank.model.Account;
 import com.bank.BiggyBank.service.AccountService;
 
 @Controller
@@ -14,16 +19,97 @@ public class BankController {
 	@Autowired
 	private AccountService accountService;
 	
-	@GetMapping("/")
-	public String home()
+	@GetMapping("/dashboard")
+	public String dashboard(Model model)
 	{
-		return "home";
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		Account account = accountService.findAccountByUsername(username);
+		model.addAttribute( "account", account);
+		return "dashboard";
 	}
 	
-	@PostMapping("/deposit/{amount}")
-	public void deposit(@PathVariable long amount)
+	@GetMapping("/register")
+	public String showRegisterationForm()
 	{
-		
+		return "register";
 	}
+	
+	@PostMapping("/register")
+	public String registerAccount(@RequestParam String username, @RequestParam String password, Model model)
+	{
+		try {
+			
+			accountService.registerAccount(username, password);
+			return "redirect:/login";
+			
+		} catch (RuntimeException e) {
+			
+			model.addAttribute("error", e.getMessage());
+			return "register";
+			
+		}
+	}
+	
+	@GetMapping("/login")
+	public String login()
+	{
+		return "login";
+	}
+	
+	@PostMapping("/deposit")
+	public String deposit(@RequestParam BigDecimal amount)
+	{
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		Account account = accountService.findAccountByUsername(username);
+		accountService.deposit(account, amount);
+		return "redirect:/dashboard";
+	}
+	
+	@PostMapping("/withdraw")
+	public String withdraw(@RequestParam BigDecimal amount, Model model)
+	{
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		Account account = accountService.findAccountByUsername(username);
+		
+		try {
+			accountService.withdraw(account, amount);
+		} catch (RuntimeException e) {
+			model.addAttribute("error", e.getMessage());
+			model.addAttribute("account", account);
+			return "dashboard";
+		}
+		
+		return "redirect:/dashboard";
+	}
+	
+	@GetMapping("/transactions")
+	public String transactionHistory(Model model)
+	{
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		Account account = accountService.findAccountByUsername(username);
+		model.addAttribute("transaction", accountService.getAllTransactions(account));
+		return "transactions";
+	}
+	
+	@PostMapping("/transfer")
+	public String transferAmount(@RequestParam String toUsername, @RequestParam BigDecimal amount, Model model)
+	{
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		Account fromAccount = accountService.findAccountByUsername(username);
+		
+		try {
+			
+		} catch (RuntimeException e) {
+			model.addAttribute("error", e.getMessage());
+			model.addAttribute("account", fromAccount);
+			return "dashboard";
+		}
+		
+		return "redirect:/dashboard";
+
+	}
+	
+	
+	
 
 }
