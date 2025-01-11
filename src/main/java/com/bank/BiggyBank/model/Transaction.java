@@ -102,4 +102,10 @@ public class Transaction {
 	public void setAccount(Account account) {
 		this.account = account;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return id+", "+amount+", "+type+", "+timeStamp;
+	}
 }

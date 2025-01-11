@@ -1,6 +1,7 @@
 package com.bank.BiggyBank.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.bank.BiggyBank.model.Account;
+import com.bank.BiggyBank.model.Transaction;
 import com.bank.BiggyBank.service.AccountService;
 
 @Controller
@@ -87,7 +89,7 @@ public class BankController {
 	{
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
 		Account account = accountService.findAccountByUsername(username);
-		model.addAttribute("transaction", accountService.getAllTransactions(account));
+		model.addAttribute("transactions", accountService.getAllTransactions(account));
 		return "transactions";
 	}
 	
@@ -98,6 +100,7 @@ public class BankController {
 		Account fromAccount = accountService.findAccountByUsername(username);
 		
 		try {
+			accountService.transferAmount(fromAccount, toUsername, amount);
 			
 		} catch (RuntimeException e) {
 			model.addAttribute("error", e.getMessage());
